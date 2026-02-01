@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gamesync/features/auth/presentation/steam/steam_login_screen.dart';
 
 import 'features/auth/presentation/auth_selection_screen.dart';
 import 'features/games/presentation/games_list_screen.dart';
@@ -21,10 +22,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      initialRoute: AuthSelectionScreen.routeName,
+      initialRoute: SteamLoginScreen.routeName,
       routes: {
         AuthSelectionScreen.routeName: (_) => const AuthSelectionScreen(),
         GamesListScreen.routeName: (_) => const GamesListScreen(),
+        SteamLoginScreen.routeName: (_) => const SteamLoginScreen(),
       },
     );
   }
