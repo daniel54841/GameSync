@@ -1,6 +1,7 @@
 // lib/features/auth/presentation/auth_selection_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gamesync/features/auth/presentation/steam/steam_login_screen.dart';
 
 import '../../games/domain/game_platform.dart';
 import '../../games/presentation/games_list_screen.dart';
@@ -39,7 +40,7 @@ class AuthSelectionScreen extends ConsumerWidget {
             enabled: enabledPlatforms.contains(GamePlatform.steam),
             onChanged: () => togglePlatform(GamePlatform.steam),
           ),
-          _PlatformTile(
+          /*_PlatformTile(
             label: 'Epic Games',
             platform: GamePlatform.epic,
             enabled: enabledPlatforms.contains(GamePlatform.epic),
@@ -56,14 +57,14 @@ class AuthSelectionScreen extends ConsumerWidget {
             platform: GamePlatform.ubisoft,
             enabled: enabledPlatforms.contains(GamePlatform.ubisoft),
             onChanged: () => togglePlatform(GamePlatform.ubisoft),
-          ),
+          ),*/
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: enabledPlatforms.isEmpty
                 ? null
                 : () {
               Navigator.of(context)
-                  .pushReplacementNamed(GamesListScreen.routeName);
+                  .pushReplacementNamed(SteamLoginScreen.routeName);
             },
             icon: const Icon(Icons.arrow_forward),
             label: const Text('Continuar'),
