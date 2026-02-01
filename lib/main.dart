@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/auth/presentation/auth_selection_screen.dart';
 import 'features/games/presentation/games_list_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Cargar variables del archivo .env
+  await dotenv.load(fileName: ".env");
   runApp(const ProviderScope(child: MyApp()));
 }
 
