@@ -1,10 +1,8 @@
-// lib/features/auth/presentation/steam_login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../games/presentation/games_list_screen.dart';
 import '../auth_providers.dart';
-
 
 class SteamLoginScreen extends ConsumerStatefulWidget {
   static const routeName = '/steam-login';
@@ -19,6 +17,28 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
   final _controller = TextEditingController();
   bool _isLoading = false;
   String? _error;
+
+  bool _rememberId = false;        // Nuevo: switch para recordar ID
+  String? _existingSteamId;        // Nuevo: saber si ya había uno guardado
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExistingSteamId();
+  }
+
+  Future<void> _loadExistingSteamId() async {
+    final storage = ref.read(steamLocalStorageProvider);
+    final savedId = await storage.getSteamId();
+
+    if (savedId != null && savedId.isNotEmpty) {
+      setState(() {
+        _existingSteamId = savedId;
+        _controller.text = savedId;   // Rellenar automáticamente
+        _rememberId = true;           // Si ya estaba guardado, marcar switch
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -40,7 +60,13 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
 
     try {
       final storage = ref.read(steamLocalStorageProvider);
-      await storage.saveSteamId(steamId);
+
+      // Guardar solo si el usuario quiere recordarlo
+      if (_rememberId) {
+        await storage.saveSteamId(steamId);
+      } else {
+        await storage.clearSteamId();
+      }
 
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed(GamesListScreen.routeName);
@@ -55,6 +81,8 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isReturningUser = _existingSteamId != null;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Conectar Steam'),
@@ -68,6 +96,7 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
+
             TextField(
               controller: _controller,
               decoration: InputDecoration(
@@ -77,7 +106,21 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
               ),
               keyboardType: TextInputType.number,
             ),
+
             const SizedBox(height: 16),
+
+            // Mostrar switch solo si ya había un ID guardado
+            if (isReturningUser)
+              SwitchListTile(
+                title: const Text("Recordar este SteamID"),
+                value: _rememberId,
+                onChanged: (value) {
+                  setState(() => _rememberId = value);
+                },
+              ),
+
+            const SizedBox(height: 16),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
