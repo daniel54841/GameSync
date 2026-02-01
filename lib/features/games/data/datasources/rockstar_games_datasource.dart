@@ -9,13 +9,7 @@ class RockstarGamesDataSource implements GamesDataSource {
     // TODO: Integrar con Social Club o backend propio.
     await Future.delayed(const Duration(milliseconds: 200));
     return const [
-      Game(
-        id: 'gta5',
-        title: 'GTA V',
-        imageUrl: 'https://example.com/gta5.jpg',
-        hoursPlayed: 350.0,
-        platform: GamePlatform.rockstar,
-      ),
+
     ];
   }
 }

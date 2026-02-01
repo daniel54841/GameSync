@@ -13,15 +13,21 @@ class GamesSortDropdown extends ConsumerWidget {
 
     return DropdownButton<GamesSortType>(
       value: sortType,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
       onChanged: (value) {
         if (value != null) {
           ref.read(gamesSortTypeProvider.notifier).state = value;
         }
       },
-      items: const [
+      items:  [
         DropdownMenuItem(
           value: GamesSortType.hoursDesc,
-          child: Text("Más jugados primero"),
+          child: Text("Más jugados primero",
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),),
         ),
         DropdownMenuItem(
           value: GamesSortType.hoursAsc,
