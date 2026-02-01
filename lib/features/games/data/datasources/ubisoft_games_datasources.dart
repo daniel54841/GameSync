@@ -9,13 +9,6 @@ class UbisoftGamesDataSource implements GamesDataSource {
     // TODO: Integrar con APIs internas de Ubisoft o backend.
     await Future.delayed(const Duration(milliseconds: 200));
     return const [
-      Game(
-        id: 'r6',
-        title: 'Rainbow Six Siege',
-        imageUrl: 'https://example.com/r6.jpg',
-        hoursPlayed: 120.0,
-        platform: GamePlatform.ubisoft,
-      ),
     ];
   }
 }

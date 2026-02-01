@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      initialRoute: SteamLoginScreen.routeName,
+      initialRoute: AuthSelectionScreen.routeName,
       routes: {
         AuthSelectionScreen.routeName: (_) => const AuthSelectionScreen(),
         GamesListScreen.routeName: (_) => const GamesListScreen(),
