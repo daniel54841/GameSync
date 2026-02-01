@@ -10,6 +10,7 @@ class GameCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.black,
       child: SizedBox(
         height: 110,
         child: Row(
