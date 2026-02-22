@@ -1,10 +1,8 @@
-// lib/features/auth/presentation/auth_selection_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gamesync/features/auth/presentation/steam/steam_login_screen.dart';
 
 import '../../games/domain/game_platform.dart';
-import '../../games/presentation/games_list_screen.dart';
 import '../../games/presentation/games_provider.dart';
 
 class AuthSelectionScreen extends ConsumerWidget {
