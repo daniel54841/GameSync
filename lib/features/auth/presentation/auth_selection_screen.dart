@@ -91,7 +91,7 @@ class _PlatformTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
-      title: Text(label),
+      title: Text(label,style: TextStyle(color: Colors.white),),
       value: enabled,
       onChanged: (_) => onChanged(),
       secondary: Icon(_iconForPlatform(platform)),

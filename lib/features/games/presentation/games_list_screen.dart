@@ -6,6 +6,7 @@ import 'package:gamesync/features/games/presentation/widget/game_cards.dart';
 import 'package:gamesync/features/games/presentation/widget/games_sort_dropdown.dart';
 
 import '../../../core/result.dart';
+import '../../auth/presentation/auth_selection_screen.dart';
 import '../domain/game.dart';
 import 'games_provider.dart';
 import 'games_sort_provider.dart'; // Asegúrate de importar tu provider de ordenamiento
@@ -30,7 +31,15 @@ class GamesListScreen extends ConsumerWidget {
             padding: EdgeInsets.only(right: 12),
             child: Center(child: GamesSortDropdown()),
           ),
-          Center(child: Image.asset(AssetsUtils.getImagesPath('logout')),),
+          GestureDetector(
+            onTap: (){
+              Navigator.of(context).pushReplacementNamed(AuthSelectionScreen.routeName);
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Center(child: Image.asset(AssetsUtils.getImagesPath('logout'),),),
+            ),
+          ),
         ],
       ),
       body: asyncGames.when(
