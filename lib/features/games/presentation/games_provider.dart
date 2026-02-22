@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 
+import '../../../core/failures.dart';
 import '../../../core/result.dart';
 import '../../auth/presentation/auth_providers.dart';
 
@@ -80,4 +81,19 @@ final gamesListProvider = FutureProvider.autoDispose<Result<List<Game>>>((
     enabledPlatforms: enabled,
     steamId: steamId,
   );
+});
+
+// ------------------------------------------------------------
+// 6. Provider de logros para un juego específico
+// ------------------------------------------------------------
+final gameAchievementsProvider = FutureProvider.family<Result<List<Achievement>>, String>((ref, appId) async {
+  final steamDs = ref.watch(steamGamesDataSourceProvider);
+  final steamIdAsync = ref.watch(steamIdProvider);
+  final steamId = steamIdAsync.valueOrNull ?? "";
+  
+  if (steamId.isEmpty) {
+    return Failure(AppFailure('SteamID no disponible'));
+  }
+  
+  return steamDs.getGameAchievements(appId: appId, steamId: steamId);
 });
