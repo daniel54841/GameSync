@@ -33,6 +33,11 @@ class SteamIdNotifier extends StateNotifier<AsyncValue<String>> {
     await repository.persistSteamId(newId);
     state = AsyncValue.data(newId);
   }
+
+  Future<void> logout() async {
+    await repository.clearSteamId();
+    state = const AsyncValue.data("");
+  }
 }
 
 final steamIdProvider = StateNotifierProvider<SteamIdNotifier, AsyncValue<String>>((ref) {

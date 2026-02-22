@@ -2,6 +2,7 @@
 abstract class AuthRepository {
   Future<void> persistSteamId(String uid);
   Future<String?> getPersistedSteamId();
+  Future<void> clearSteamId();
 }
 
 // domain/use_cases/get_steam_id_use_case.dart

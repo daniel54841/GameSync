@@ -6,9 +6,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/result.dart';
 import '../../auth/presentation/auth_providers.dart';
-import '../../auth/data/steam_local_storage.dart';
 
-import '../data/datasources/games_datasource.dart';
 import '../data/datasources/steam_games_datasources.dart';
 import '../data/datasources/ubisoft_games_datasources.dart';
 import '../domain/game.dart';
@@ -35,46 +33,26 @@ final dioProvider = Provider<Dio>((ref) {
 // ------------------------------------------------------------
 // 2. Provider del DataSource REAL de Steam
 // ------------------------------------------------------------
-
-
 final steamGamesDataSourceProvider = Provider<SteamGamesDataSource>((ref) {
   final dio = ref.watch(dioProvider);
-  final storage = ref.watch(steamLocalStorageProvider);
   final apiKey = dotenv.env['STEAM_API_KEY'] ?? '';
-  return SteamGamesDataSource(dio: dio, storage: storage, apiKey: apiKey);
+  return SteamGamesDataSource(dio: dio, apiKey: apiKey);
 });
 
 // ------------------------------------------------------------
-// 3. Adaptador para que SteamGamesDataSource encaje en GamesDataSource
-// ------------------------------------------------------------
-class _SteamDataSourceAdapter implements GamesDataSource {
-  final SteamGamesDataSource _inner;
-
-  _SteamDataSourceAdapter(this._inner);
-
-  @override
-  Future<List<Game>> fetchGames() async {
-    final result = await _inner.fetchGames();
-    if (result is Success<List<Game>>) return result.value;
-    return [];
-  }
-}
-
-// ------------------------------------------------------------
-// 4. Provider del repositorio de juegos
+// 3. Provider del repositorio de juegos
 // ------------------------------------------------------------
 final gamesRepositoryProvider = Provider<GamesRepository>((ref) {
   final steamDs = ref.watch(steamGamesDataSourceProvider);
   return GamesRepositoryImpl({
-    GamePlatform.steam: _SteamDataSourceAdapter(steamDs),
     GamePlatform.epic: EpicGamesDataSource(),
     GamePlatform.rockstar: RockstarGamesDataSource(),
     GamePlatform.ubisoft: UbisoftGamesDataSource(),
-  });
+  }, steamDs);
 });
 
 // ------------------------------------------------------------ //
-// 5. Provider de plataformas activadas
+// 4. Provider de plataformas activadas
 // ------------------------------------------------------------
 final enabledPlatformsProvider = StateProvider<Set<GamePlatform>>(
   (ref) => {
@@ -84,13 +62,22 @@ final enabledPlatformsProvider = StateProvider<Set<GamePlatform>>(
     GamePlatform.ubisoft,
   },
 );
+
 // ------------------------------------------------------------
-// 6. Provider que obtiene la lista de juegos
+// 5. Provider que obtiene la lista de juegos
 // ------------------------------------------------------------
 final gamesListProvider = FutureProvider.autoDispose<Result<List<Game>>>((
   ref,
 ) async {
   final repo = ref.watch(gamesRepositoryProvider);
   final enabled = ref.watch(enabledPlatformsProvider);
-  return repo.getAllGames(enabledPlatforms: enabled);
+  
+  // Obtenemos el SteamID actual del provider de autenticación
+  final steamIdAsync = ref.watch(steamIdProvider);
+  final steamId = steamIdAsync.valueOrNull;
+  
+  return repo.getAllGames(
+    enabledPlatforms: enabled,
+    steamId: steamId,
+  );
 });

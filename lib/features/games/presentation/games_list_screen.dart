@@ -6,6 +6,7 @@ import 'package:gamesync/features/games/presentation/widget/game_cards.dart';
 import 'package:gamesync/features/games/presentation/widget/games_sort_dropdown.dart';
 
 import '../../../core/result.dart';
+import '../../auth/presentation/auth_providers.dart';
 import '../../auth/presentation/auth_selection_screen.dart';
 import '../domain/game.dart';
 import 'games_provider.dart';
@@ -32,8 +33,13 @@ class GamesListScreen extends ConsumerWidget {
             child: Center(child: GamesSortDropdown()),
           ),
           GestureDetector(
-            onTap: (){
-              Navigator.of(context).pushReplacementNamed(AuthSelectionScreen.routeName);
+            onTap: () async {
+              // Limpiar el Steam ID de las preferencias y del estado
+              await ref.read(steamIdProvider.notifier).logout();
+              
+              if (context.mounted) {
+                Navigator.of(context).pushReplacementNamed(AuthSelectionScreen.routeName);
+              }
             },
             child: Padding(
               padding: const EdgeInsets.only(right: 12),

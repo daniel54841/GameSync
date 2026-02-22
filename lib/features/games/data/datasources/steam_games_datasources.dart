@@ -3,26 +3,21 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/failures.dart';
 import '../../../../core/result.dart';
-import '../../../auth/data/steam_local_storage.dart';
 import '../../domain/game.dart';
 import '../../domain/game_platform.dart';
 
 class SteamGamesDataSource {
   final Dio _dio;
-  final SteamLocalStorage _storage;
   final String apiKey;
 
   SteamGamesDataSource({
     required Dio dio,
-    required SteamLocalStorage storage,
     required this.apiKey,
-  })  : _dio = dio,
-        _storage = storage;
+  }) : _dio = dio;
 
-  Future<Result<List<Game>>> fetchGames() async {
+  Future<Result<List<Game>>> fetchGames(String steamId) async {
     try {
-      final steamId = await _storage.getSteamId();
-      if (steamId == null) {
+      if (steamId.isEmpty) {
         return Failure(AppFailure('No hay SteamID configurado'));
       }
 

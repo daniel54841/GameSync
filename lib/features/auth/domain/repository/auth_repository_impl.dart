@@ -12,4 +12,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> persistSteamId(String uid) => localDataSource.saveSteamId(uid);
+
+  @override
+  Future<void> clearSteamId() => localDataSource.clearSteamId();
 }
