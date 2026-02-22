@@ -18,28 +18,6 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
   bool _isLoading = false;
   String? _error;
 
-  bool _rememberId = false;        // Nuevo: switch para recordar ID
-  String? _existingSteamId;        // Nuevo: saber si ya había uno guardado
-
-  @override
-  void initState() {
-    super.initState();
-    _loadExistingSteamId();
-  }
-
-  Future<void> _loadExistingSteamId() async {
-    final storage = ref.read(steamLocalStorageProvider);
-    final savedId = await storage.getSteamId();
-
-    if (savedId != null && savedId.isNotEmpty) {
-      setState(() {
-        _existingSteamId = savedId;
-        _controller.text = savedId;   // Rellenar automáticamente
-        _rememberId = true;           // Si ya estaba guardado, marcar switch
-      });
-    }
-  }
-
   @override
   void dispose() {
     _controller.dispose();
@@ -59,16 +37,11 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
     });
 
     try {
-      final storage = ref.read(steamLocalStorageProvider);
-
-      // Guardar solo si el usuario quiere recordarlo
-      if (_rememberId) {
-        await storage.saveSteamId(steamId);
-      } else {
-        await storage.clearSteamId();
-      }
+      // Guardamos el SteamID en el almacenamiento persistente
+      await ref.read(steamIdProvider.notifier).updateId(steamId);
 
       if (!mounted) return;
+      // Navegamos a la lista de juegos ahora que el ID está guardado
       Navigator.of(context).pushReplacementNamed(GamesListScreen.routeName);
     } catch (e) {
       setState(() => _error = 'Error guardando SteamID');
@@ -81,61 +54,82 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isReturningUser = _existingSteamId != null;
+    final steamIdAsync = ref.watch(steamIdProvider);
+
+    // Escuchar cambios para auto-rellenar si es necesario
+    ref.listen<AsyncValue<String>>(steamIdProvider, (previous, next) {
+      next.whenData((value) {
+        if (_controller.text.isEmpty && value.isNotEmpty) {
+          _controller.text = value;
+        }
+      });
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Conectar Steam'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const Text(
-              'Introduce tu SteamID64.\nPuedes obtenerlo en páginas como steamid.io.',
-              textAlign: TextAlign.center,
+      body: steamIdAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+        data: (savedId) {
+          // Si ya hay un ID guardado y el campo está vacío, lo ponemos por defecto
+          if (_controller.text.isEmpty && savedId.isNotEmpty) {
+            _controller.text = savedId;
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Introduce tu SteamID64.\nPuedes encontrarlo en la URL de tu perfil de Steam.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    labelText: 'SteamID64',
+                    hintText: 'Ej: 76561198000000000',
+                    border: const OutlineInputBorder(),
+                    errorText: _error,
+                    prefixIcon: const Icon(Icons.person),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _onSubmit,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Guardar y continuar'),
+                  ),
+                ),
+                if (savedId.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Text(
+                      'ID actual: $savedId',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 16),
-
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                labelText: 'SteamID64',
-                border: const OutlineInputBorder(),
-                errorText: _error,
-              ),
-              keyboardType: TextInputType.number,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Mostrar switch solo si ya había un ID guardado
-            if (isReturningUser)
-              SwitchListTile(
-                title: const Text("Recordar este SteamID"),
-                value: _rememberId,
-                onChanged: (value) {
-                  setState(() => _rememberId = value);
-                },
-              ),
-
-            const SizedBox(height: 16),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _onSubmit,
-                child: _isLoading
-                    ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-                    : const Text('Guardar y continuar'),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
