@@ -67,7 +67,7 @@ class _SteamLoginScreenState extends ConsumerState<SteamLoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conectar Steam'),
+        title: const Text('Sincronizar con Steam'),
       ),
       body: steamIdAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

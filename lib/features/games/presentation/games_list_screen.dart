@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gamesync/core/utils/assets_utils.dart';
 
 import 'package:gamesync/features/games/presentation/widget/game_cards.dart';
 import 'package:gamesync/features/games/presentation/widget/games_sort_dropdown.dart';
@@ -23,11 +24,13 @@ class GamesListScreen extends ConsumerWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Tus juegos'),
-        actions: const [
-          Padding(
+        actions: [
+
+          const Padding(
             padding: EdgeInsets.only(right: 12),
             child: Center(child: GamesSortDropdown()),
           ),
+          Center(child: Image.asset(AssetsUtils.getImagesPath('logout')),),
         ],
       ),
       body: asyncGames.when(
